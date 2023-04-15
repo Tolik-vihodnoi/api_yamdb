@@ -17,6 +17,7 @@ class Genre(models.Model):
     class Meta:
         verbose_name = 'Жанр'
         verbose_name_plural = 'Жанры'
+        ordering = ('name', )
 
     def __str__(self):
         return self.name[:settings.DISP_LETTERS]
@@ -52,7 +53,7 @@ class Title(models.Model):
     )
 
     class Meta:
-        ordering = ['name']
+        ordering = ('name', )
         verbose_name = 'Приозведение'
         verbose_name_plural = 'Произведения'
 
@@ -101,7 +102,7 @@ class Category(models.Model):
     )
 
     class Meta:
-        ordering = ['name']
+        ordering = ('name', )
         verbose_name = 'Категория'
         verbose_name_plural = 'Категории'
 
