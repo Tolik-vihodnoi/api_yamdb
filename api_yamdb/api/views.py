@@ -1,16 +1,23 @@
 from smtplib import SMTPResponseException
-from django.shortcuts import get_object_or_404
-from rest_framework.decorators import api_view, permission_classes, action
-from rest_framework.permissions import AllowAny, IsAuthenticated
+
+from django.conf import settings
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
-from .serializers import CreateTokenSerializer, CreateUserSerializer, UserSerializer
-from users.models import User
-from django.conf import settings
-from rest_framework import status, viewsets
+from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters, mixins, status, viewsets
+from rest_framework.decorators import action, api_view, permission_classes
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
-from .permissions import IsAdminUser
+
+from reviews.models import Category, Genre, Title
+from users.models import User
+from .filters import TitleFilter
+from .permissions import IsAdminOrReadOnly, IsAdminUser
+from .serializers import (CategorySerializer, CreateTokenSerializer,
+                          CreateUserSerializer, GenreSerializer,
+                          TitleSerializer, UserSerializer)
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -84,3 +91,37 @@ def create_token(request):
         {'message': 'Нет доступа'},
         status=status.HTTP_400_BAD_REQUEST
     )
+
+
+class CategoryViewSet(mixins.CreateModelMixin,
+                      mixins.DestroyModelMixin,
+                      mixins.ListModelMixin,
+                      viewsets.GenericViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    permission_classes = (IsAdminOrReadOnly, )
+    filter_backends = (filters.SearchFilter, )
+    search_fields = ('$name', )
+    lookup_field = 'slug'
+    lookup_value_regex = r'[-a-zA-Z0-9_]{,50}'
+
+
+class GenreViewSet(mixins.CreateModelMixin,
+                   mixins.DestroyModelMixin,
+                   mixins.ListModelMixin,
+                   viewsets.GenericViewSet):
+    queryset = Genre.objects.all()
+    serializer_class = GenreSerializer
+    permission_classes = (IsAdminOrReadOnly, )
+    filter_backends = (filters.SearchFilter, )
+    search_fields = ('$name', )
+    lookup_field = 'slug'
+    lookup_value_regex = r'[-a-zA-Z0-9_]{,50}'
+
+
+class TitleViewSet(viewsets.ModelViewSet):
+    queryset = Title.objects.all()
+    serializer_class = TitleSerializer
+    permission_classes = (IsAdminOrReadOnly, )
+    filter_backends = (DjangoFilterBackend, )
+    filterset_class = TitleFilter
