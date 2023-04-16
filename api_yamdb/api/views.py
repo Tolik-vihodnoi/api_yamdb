@@ -35,6 +35,11 @@ class UserViewSet(viewsets.ModelViewSet):
         if request.method == 'GET':
             serialiser = UserSerializer(request.user)
             return Response(serialiser.data)
+        
+        serialiser = UserSerializer(request.user, request.data, partial=True)
+        serialiser.is_valid(raise_exception=True)
+        serialiser.save(role=request.user.role)
+        return Response(serialiser.data)
 
 
 @api_view(['POST'])
