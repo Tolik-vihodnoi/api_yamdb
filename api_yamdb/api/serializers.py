@@ -1,4 +1,8 @@
-from reviews.models import Category, Genre
+import datetime
+
+from rest_framework.exceptions import ValidationError
+
+from reviews.models import Category, Genre, GenreTitle, Title
 from users.models import User
 from rest_framework import serializers, validators
 
@@ -27,10 +31,19 @@ class UserSerializer(serializers.ModelSerializer):
                   'last_name', 'bio', 'role', )
 
 
+class CustomSlugRelatedField(serializers.SlugRelatedField):
+
+    def to_representation(self, obj):
+        return {"name": obj.name, "slug": obj.slug}
+
+
 class CategorySerializer(serializers.ModelSerializer):
     slug = serializers.SlugField(
         max_length=50,
-        validators=[validators.UniqueValidator(Category.objects.all())]
+        validators=[validators.UniqueValidator(
+            Category.objects.all(),
+            message='Категория с таким slug уже существует'
+        )]
     )
 
     class Meta:
@@ -39,7 +52,40 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class GenreSerializer(serializers.ModelSerializer):
+    slug = serializers.SlugField(
+        max_length=50,
+        validators=[validators.UniqueValidator(
+            Genre.objects.all(),
+            message='Жанр с таким slug уже существует'
+        )]
+    )
 
     class Meta:
         model = Genre
         fields = ('name', 'slug')
+
+
+class TitleSerializer(serializers.ModelSerializer):
+    genre = CustomSlugRelatedField(
+        many=True,
+        slug_field='slug',
+        queryset=Genre.objects.all()
+    )
+    category = CustomSlugRelatedField(
+        slug_field='slug',
+        queryset=Category.objects.all()
+    )
+
+    class Meta:
+        model = Title
+        fields = ('id', 'name', 'year', 'description',
+                  # 'rating',
+                  'genre', 'category')
+
+    def validate_year(self, value):
+        if value > datetime.date.today().year:
+            raise ValidationError("Год произведения не может быть больше"
+                                  "текущего года")
+        print("ЗАВАЛИДИРОВАЛИ ГОД")
+        return value
+

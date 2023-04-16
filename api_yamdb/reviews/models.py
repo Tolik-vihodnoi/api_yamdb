@@ -17,6 +17,7 @@ class Genre(models.Model):
     class Meta:
         verbose_name = 'Жанр'
         verbose_name_plural = 'Жанры'
+        ordering = ('name', )
 
     def __str__(self):
         return self.name[:settings.DISP_LETTERS]
@@ -25,7 +26,6 @@ class Genre(models.Model):
 class Title(models.Model):
     name = models.CharField(
         max_length=256,
-        unique=True,
         db_index=True,
         verbose_name='Название произведения'
     )
@@ -52,9 +52,13 @@ class Title(models.Model):
     )
 
     class Meta:
-        ordering = ['name']
-        verbose_name = 'Приозведение'
+        ordering = ('name', )
+        verbose_name = 'Произведение'
         verbose_name_plural = 'Произведения'
+        constraints = [models.UniqueConstraint(
+            fields=('name', 'category'),
+            name='name_category'
+        )]
 
     def __str__(self):
         return self.name[:settings.DISP_LETTERS]
@@ -101,7 +105,7 @@ class Category(models.Model):
     )
 
     class Meta:
-        ordering = ['name']
+        ordering = ('name', )
         verbose_name = 'Категория'
         verbose_name_plural = 'Категории'
 
