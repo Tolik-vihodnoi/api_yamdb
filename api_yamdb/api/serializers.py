@@ -1,20 +1,33 @@
 import datetime
-
 from rest_framework.exceptions import ValidationError
+<<<<<<< HEAD
 from django.db.models import Avg
 
 from reviews.models import Category, Genre, GenreTitle, Title, Comment, Review
+=======
+from reviews.models import Category, Genre, GenreTitle, Title
+>>>>>>> 9af9bfd (Rebase)
 from users.models import User
+from .validators import validate_username, validate_email, username_validator
 from rest_framework import serializers, validators
 from rest_framework.relations import SlugRelatedField
 
 
+
 class CreateUserSerializer(serializers.ModelSerializer):
     """Сериализатор создания нового пользователя."""
+    email = serializers.EmailField(max_length=254)
+    username = serializers.CharField(max_length=150,
+                                     validators=[username_validator])
 
     class Meta:
         model = User
         fields = ('username', 'email',)
+
+    def validate_username(self, username):
+        if username == 'me':
+            raise ValidationError("Имя 'me' в качестве username запрещено!")
+        return username
 
 
 class CreateTokenSerializer(serializers.ModelSerializer):
@@ -28,6 +41,9 @@ class CreateTokenSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(max_length=254, validators=[validate_email])
+    username = serializers.CharField(max_length=150, validators=[
+        validate_username, username_validator])
 
     class Meta:
         model = User
@@ -91,6 +107,7 @@ class TitleSerializer(serializers.ModelSerializer):
             raise ValidationError("Год произведения не может быть больше"
                                   "текущего года")
         return value
+<<<<<<< HEAD
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -132,3 +149,5 @@ class CommentSerializer(serializers.ModelSerializer):
         exclude = ('review_id',)
         read_only_fields = ('review_id', 'pub_date')
         model = Comment
+=======
+>>>>>>> 9af9bfd (Rebase)
