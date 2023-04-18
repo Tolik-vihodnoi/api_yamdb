@@ -14,11 +14,12 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from reviews.models import Category, Genre, Title, Review
 from users.models import User
 from .filters import TitleFilter
-from .permissions import IsAdminOrReadOnly, IsAdminUser
+from .permissions import IsAdminModeratorAuthor, IsAdminUser, IsAdminOrReadOnly
 from .serializers import (CategorySerializer, CreateTokenSerializer,
                           CreateUserSerializer, GenreSerializer,
-                          TitleSerializer, UserSerializer, CommentSerializer, 
+                          TitleSerializer, UserSerializer, CommentSerializer,
                           ReviewSerializer)
+from django.db.models import Avg
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -121,7 +122,7 @@ class GenreViewSet(mixins.CreateModelMixin,
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Title.objects.all()
+    queryset = Title.objects.annotate(rating=Avg('reviews__score'))
     serializer_class = TitleSerializer
     permission_classes = (IsAdminOrReadOnly, )
     filter_backends = (DjangoFilterBackend, )
@@ -130,7 +131,7 @@ class TitleViewSet(viewsets.ModelViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    permission_classes = (IsAdminOrReadOnly, IsAdminUser)
+    permission_classes = (IsAdminModeratorAuthor,)
 
     def get_queryset(self):
         review = get_object_or_404(Review, id=self.kwargs.get('review_id'))
@@ -145,7 +146,7 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    permission_classes = (IsAdminOrReadOnly, IsAdminUser)
+    permission_classes = (IsAdminModeratorAuthor,)
 
     def get_queryset(self):
         title = get_object_or_404(

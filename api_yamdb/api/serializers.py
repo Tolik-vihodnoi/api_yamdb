@@ -1,6 +1,7 @@
 import datetime
 
 from rest_framework.exceptions import ValidationError
+from django.db.models import Avg
 
 from reviews.models import Category, Genre, GenreTitle, Title, Comment, Review
 from users.models import User
@@ -69,6 +70,7 @@ class GenreSerializer(serializers.ModelSerializer):
 
 
 class TitleSerializer(serializers.ModelSerializer):
+    rating = serializers.SerializerMethodField(required=False)
     genre = CustomSlugRelatedField(
         many=True,
         slug_field='slug',
@@ -78,12 +80,12 @@ class TitleSerializer(serializers.ModelSerializer):
         slug_field='slug',
         queryset=Category.objects.all()
     )
+    rating = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Title
-        fields = ('id', 'name', 'year', 'description',
-                  # 'rating',
-                  'genre', 'category')
+        fields = ('id', 'name', 'year',
+                  'rating', 'description', 'genre', 'category')
 
     def validate_year(self, value):
         if value > datetime.date.today().year:

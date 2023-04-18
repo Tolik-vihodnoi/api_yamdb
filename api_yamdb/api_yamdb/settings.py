@@ -116,12 +116,12 @@ EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_emails')
 MAILING_EMAIL = 'yamdb_code@gmail.com'
 
 REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': [
+    'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAdminUser',
-    ],
-    'DEFAULT_AUTHENTICATION_CLASSES': [
+    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ],
+    ),
     'DEFAULT_PAGINATION_CLASS':
         'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 5,
