@@ -70,7 +70,6 @@ class GenreSerializer(serializers.ModelSerializer):
 
 
 class TitleSerializer(serializers.ModelSerializer):
-    rating = serializers.SerializerMethodField(required=False)
     genre = CustomSlugRelatedField(
         many=True,
         slug_field='slug',
