@@ -1,8 +1,9 @@
 from smtplib import SMTPResponseException
-
+from rest_framework.exceptions import ValidationError
 from django.conf import settings
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
+from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, status, viewsets
@@ -25,6 +26,16 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     permission_classes = [IsAdminUser]
     lookup_field = 'username'
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('username',)
+
+    def update(self, request, *args, **kwargs):
+        if request.method == 'PUT':
+            return Response(
+                {'error': 'Метод PUT запрещен'},
+                status=status.HTTP_405_METHOD_NOT_ALLOWED
+            )
+        return super().update(request, *args, **kwargs)
 
     @action(
         detail=False,
@@ -48,11 +59,12 @@ def signup(request):
     """Создание нового пользователя."""
     serializer = CreateUserSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
-    username = serializer.validated_data.get('username')
     email = serializer.validated_data.get('email')
-    user, created = User.objects.get_or_create(username=username, email=email)
+    try:
+        user, _ = User.objects.get_or_create(**serializer.validated_data)
+    except IntegrityError:
+        raise ValidationError('Используемый вами email или username уже занят')
     token = default_token_generator.make_token(user)
-
     try:
         send_mail(
             'confirmation code',
