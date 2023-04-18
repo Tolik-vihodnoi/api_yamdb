@@ -102,7 +102,7 @@ class ReviewSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        exclude = ('title',)
+        exclude = ('title_id',)
         read_only_fields = ('pub_date',)
         model = Review
 
@@ -113,7 +113,7 @@ class ReviewSerializer(serializers.ModelSerializer):
         title_id = self.context['view'].kwargs.get('title_id')
         author = self.context['request'].user
         review = Review.objects.filter(
-            author=author, title=title_id
+            author=author, title_id=title_id
         )
         if review.exists():
             raise serializers.ValidationError(

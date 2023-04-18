@@ -118,7 +118,7 @@ class Category(models.Model):
 
 
 class Review(models.Model):
-    title = models.ForeignKey(
+    title_id = models.ForeignKey(
         Title,
         on_delete=models.CASCADE,
         related_name='reviews',
@@ -150,7 +150,7 @@ class Review(models.Model):
         ordering = ('-pub_date',)
         constraints = [
             models.UniqueConstraint(
-                fields=['author', 'title'], name="unique_review")
+                fields=['author', 'title_id'], name="unique_review")
         ]
 
 
