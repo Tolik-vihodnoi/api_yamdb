@@ -41,7 +41,7 @@ class Title(models.Model):
     genre = models.ManyToManyField(
         Genre,
         through='GenreTitle',
-        through_fields=('title', 'genre'),
+        through_fields=('title_id', 'genre_id'),
         related_name='titles',
         verbose_name='Жанр'
     )
@@ -69,14 +69,14 @@ class Title(models.Model):
 
 
 class GenreTitle(models.Model):
-    genre = models.ForeignKey(
+    genre_id = models.ForeignKey(
         Genre,
         related_name='genre_title',
         on_delete=models.SET_NULL,
         blank=True,
         null=True,
     )
-    title = models.ForeignKey(
+    title_id = models.ForeignKey(
         Title,
         related_name='genre_title',
         on_delete=models.SET_NULL,
@@ -87,7 +87,7 @@ class GenreTitle(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=['genre', 'title'],
+                fields=['genre_id', 'title_id'],
                 name='unique_genre_title'
             ),
         ]
