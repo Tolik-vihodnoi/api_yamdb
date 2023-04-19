@@ -1,17 +1,11 @@
 import datetime
-from rest_framework.exceptions import ValidationError
-<<<<<<< HEAD
-from django.db.models import Avg
 
-from reviews.models import Category, Genre, GenreTitle, Title, Comment, Review
-=======
-from reviews.models import Category, Genre, GenreTitle, Title
->>>>>>> 9af9bfd (Rebase)
-from users.models import User
-from .validators import validate_username, validate_email, username_validator
 from rest_framework import serializers, validators
-from rest_framework.relations import SlugRelatedField
+from rest_framework.exceptions import ValidationError
 
+from reviews.models import Category, Comment, Genre, Review, Title
+from users.models import User
+from .validators import username_validator, validate_email, validate_username
 
 
 class CreateUserSerializer(serializers.ModelSerializer):
@@ -107,7 +101,6 @@ class TitleSerializer(serializers.ModelSerializer):
             raise ValidationError("Год произведения не может быть больше"
                                   "текущего года")
         return value
-<<<<<<< HEAD
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -149,5 +142,3 @@ class CommentSerializer(serializers.ModelSerializer):
         exclude = ('review_id',)
         read_only_fields = ('review_id', 'pub_date')
         model = Comment
-=======
->>>>>>> 9af9bfd (Rebase)
