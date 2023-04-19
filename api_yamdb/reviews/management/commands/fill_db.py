@@ -1,6 +1,6 @@
 import csv
 import os
-from typing import Type
+from typing import Type, Union
 
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
@@ -15,9 +15,9 @@ from users.models import User
 class Command(BaseCommand):
     """Import data from .csv files to DB."""
 
-    help = 'Fill the DB whith record values from .csv files'
-    csv_path = os.path.join(settings.BASE_DIR, 'static/data')
-    csvf_model = {
+    help: str = 'Fill the DB whith record values from .csv files'
+    csv_path: str = os.path.join(settings.BASE_DIR, 'static/data')
+    csvf_model: dict[str, Type[Model]] = {
         "users.csv": User,
         "category.csv": Category,
         "genre.csv": Genre,
@@ -28,7 +28,11 @@ class Command(BaseCommand):
     }
 
     @staticmethod
-    def rel_id_to_model_inst(model, row):
+    def rel_id_to_model_inst(
+            model: Type[Model],
+            row: dict[str, Union[int, str, None]]) -> None:
+        """Substitutes the instance of the associated
+        model instead of the id."""
         for field in model._meta.fields:
             if isinstance(field, ForeignKey):
                 if field.name in row:
@@ -42,8 +46,9 @@ class Command(BaseCommand):
                                        f"of model {model} in csv file")
 
     def create_model_instances(self, csv_f: str, model: Type[Model]) -> None:
-        records = []
-        file = os.path.join(self.csv_path, csv_f)
+        """Create model instances."""
+        records: list = []
+        file: str = os.path.join(self.csv_path, csv_f)
         with open(file, newline='') as csvfile:
             reader = csv.DictReader(csvfile)
             for row in reader:
@@ -60,7 +65,6 @@ class Command(BaseCommand):
                 f'Importing {model} records completed successfully.'))
 
     def add_arguments(self, parser):
-
         parser.add_argument(
             '-d'
             '--delete-existing',
