@@ -43,7 +43,12 @@ pip install -r requirements.txt
 python manage.py migrate
 ```
 
-6. Запуск проекта
+6. Наполнение базы данных записями из .csv файлов
+```
+python manage.py fill_db -d
+```
+
+7. Запуск проекта
 ```
 python manage.py runserver
 ```
