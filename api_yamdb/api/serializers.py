@@ -1,20 +1,27 @@
 import datetime
 
-from rest_framework.exceptions import ValidationError
-from django.db.models import Avg
-
-from reviews.models import Category, Genre, GenreTitle, Title, Comment, Review
-from users.models import User
 from rest_framework import serializers, validators
-from rest_framework.relations import SlugRelatedField
+from rest_framework.exceptions import ValidationError
+
+from reviews.models import Category, Comment, Genre, Review, Title
+from users.models import User
+from .validators import username_validator, validate_email, validate_username
 
 
 class CreateUserSerializer(serializers.ModelSerializer):
     """Сериализатор создания нового пользователя."""
+    email = serializers.EmailField(max_length=254)
+    username = serializers.CharField(max_length=150,
+                                     validators=[username_validator])
 
     class Meta:
         model = User
         fields = ('username', 'email',)
+
+    def validate_username(self, username):
+        if username == 'me':
+            raise ValidationError("Имя 'me' в качестве username запрещено!")
+        return username
 
 
 class CreateTokenSerializer(serializers.ModelSerializer):
@@ -28,6 +35,9 @@ class CreateTokenSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(max_length=254, validators=[validate_email])
+    username = serializers.CharField(max_length=150, validators=[
+        validate_username, username_validator])
 
     class Meta:
         model = User

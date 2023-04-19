@@ -14,7 +14,8 @@ class GenreTitleInline(admin.TabularInline):
 
 class TitleAdmin(admin.ModelAdmin):
     list_display = (
-        'id', 'name', 'year', 'get_genre', 'get_score', 'category', 'description'
+        'id', 'name', 'year', 'get_genre',
+        'get_score', 'category', 'description'
     )
     inlines = [GenreTitleInline, ]
     list_filter = ('category', )
@@ -34,7 +35,6 @@ class CategoryAdmin(admin.ModelAdmin):
     list_filter = ('name', )
 
 
-@admin.register(Review)
 class ReviewAdmin(admin.ModelAdmin):
     list_display = ('pk', 'title', 'text', 'author', 'score', 'pub_date')
     list_fields = ('text', 'author__username')
@@ -43,3 +43,4 @@ class ReviewAdmin(admin.ModelAdmin):
 admin.site.register(Genre, GenreAdmin)
 admin.site.register(Title, TitleAdmin)
 admin.site.register(Category, CategoryAdmin)
+admin.site.register(Review, ReviewAdmin)
