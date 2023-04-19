@@ -90,7 +90,6 @@ class TitleSerializer(serializers.ModelSerializer):
         if value > datetime.date.today().year:
             raise ValidationError("Год произведения не может быть больше"
                                   "текущего года")
-        print("ЗАВАЛИДИРОВАЛИ ГОД")
         return value
 
 
