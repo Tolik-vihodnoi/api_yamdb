@@ -111,10 +111,10 @@ class ReviewSerializer(serializers.ModelSerializer):
             return data
         title_id = self.context['view'].kwargs.get('title_id')
         author = self.context['request'].user
-        review = Review.objects.filter(
-            author=author, title=title_id
+        review_id = Review.objects.filter(
+            author=author, title_id=title_id
         )
-        if review.exists():
+        if review_id.exists():
             raise serializers.ValidationError(
                 'На каждое произведение можно опубликовать только один отзыв.'
             )
@@ -129,6 +129,6 @@ class CommentSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        exclude = ('review',)
-        read_only_fields = ('review', 'pub_date')
+        exclude = ('review_id',)
+        read_only_fields = ('review_id', 'pub_date')
         model = Comment
