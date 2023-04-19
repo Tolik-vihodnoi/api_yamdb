@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.db.models import Avg
 
 from .models import Category, Genre, GenreTitle, Review, Title
 
@@ -13,7 +14,7 @@ class GenreTitleInline(admin.TabularInline):
 
 class TitleAdmin(admin.ModelAdmin):
     list_display = (
-        'id', 'name', 'year', 'get_genre', 'category', 'description'
+        'id', 'name', 'year', 'get_genre', 'get_score', 'category', 'description'
     )
     inlines = [GenreTitleInline, ]
     list_filter = ('category', )
@@ -22,6 +23,10 @@ class TitleAdmin(admin.ModelAdmin):
 
     def get_genre(self, obj):
         return ', '.join((p.name for p in obj.genre.all()))
+
+    def get_score(self, obj):
+        return round(
+            obj.reviews.all().aggregate(score=Avg('score'))['score'], 1)
 
 
 class CategoryAdmin(admin.ModelAdmin):
