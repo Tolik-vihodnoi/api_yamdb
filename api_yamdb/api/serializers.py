@@ -102,7 +102,7 @@ class ReviewSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        exclude = ('title_id',)
+        exclude = ('title',)
         read_only_fields = ('pub_date',)
         model = Review
 

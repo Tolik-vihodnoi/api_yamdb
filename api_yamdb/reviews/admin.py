@@ -31,7 +31,7 @@ class CategoryAdmin(admin.ModelAdmin):
 
 @admin.register(Review)
 class ReviewAdmin(admin.ModelAdmin):
-    list_display = ('pk', 'title_id', 'text', 'author', 'score', 'pub_date')
+    list_display = ('pk', 'title', 'text', 'author', 'score', 'pub_date')
     list_fields = ('text', 'author__username')
 
 
