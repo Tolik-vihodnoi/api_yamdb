@@ -1,7 +1,9 @@
 from smtplib import SMTPResponseException
+
 from django.conf import settings
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
+from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, status, viewsets
@@ -10,22 +12,24 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import Token
 
-from reviews.models import Category, Genre, Title, Review
+from reviews.models import Category, Genre, Review, Title
 from users.models import User
 from .filters import TitleFilter
-from .permissions import IsAdminModeratorAuthor, IsAdminUser, IsAdminOrReadOnly
-from .serializers import (CategorySerializer, CreateTokenSerializer,
-                          CreateUserSerializer, GenreSerializer,
-                          TitleSerializer, UserSerializer, CommentSerializer,
-                          ReviewSerializer)
-from django.db.models import Avg
+from .permissions import IsAdminModeratorAuthor, IsAdminOrReadOnly, IsAdminUser
+from .serializers import (CategorySerializer, CommentSerializer,
+                          CreateTokenSerializer, CreateUserSerializer,
+                          GenreSerializer, ReviewSerializer, TitleSerializer,
+                          UserSerializer)
 
 
-class UserViewSet(viewsets.ModelViewSet):
+class GetPostPatchDelModelViewSet(viewsets.ModelViewSet):
+    http_method_names = ['get', 'post', 'patch', 'delete']
+
+
+class UserViewSet(GetPostPatchDelModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [IsAdminUser]
-    http_method_names = ['get', 'post', 'patch', 'delete']
     lookup_field = 'username'
     filter_backends = (filters.SearchFilter,)
     search_fields = ('username',)
@@ -95,41 +99,37 @@ def create_token(request):
     )
 
 
-class CategoryViewSet(mixins.CreateModelMixin,
-                      mixins.DestroyModelMixin,
-                      mixins.ListModelMixin,
-                      viewsets.GenericViewSet):
+class CustomCrDelListViewSet(mixins.CreateModelMixin,
+                             mixins.DestroyModelMixin,
+                             mixins.ListModelMixin,
+                             viewsets.GenericViewSet):
+    permission_classes = (IsAdminOrReadOnly,)
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('$name',)
+    lookup_field = 'slug'
+    lookup_value_regex = r'[-a-zA-Z0-9_]{,50}'
+
+
+class CategoryViewSet(CustomCrDelListViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = (IsAdminOrReadOnly, )
-    filter_backends = (filters.SearchFilter, )
-    search_fields = ('$name', )
-    lookup_field = 'slug'
-    lookup_value_regex = r'[-a-zA-Z0-9_]{,50}'
 
 
-class GenreViewSet(mixins.CreateModelMixin,
-                   mixins.DestroyModelMixin,
-                   mixins.ListModelMixin,
-                   viewsets.GenericViewSet):
+class GenreViewSet(CustomCrDelListViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    permission_classes = (IsAdminOrReadOnly, )
-    filter_backends = (filters.SearchFilter, )
-    search_fields = ('$name', )
-    lookup_field = 'slug'
-    lookup_value_regex = r'[-a-zA-Z0-9_]{,50}'
 
 
-class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Title.objects.annotate(rating=Avg('reviews__score'))
+class TitleViewSet(GetPostPatchDelModelViewSet):
+    queryset = Title.objects.annotate(
+        rating=Avg('reviews__score')).order_by('name', 'category')
     serializer_class = TitleSerializer
     permission_classes = (IsAdminOrReadOnly, )
     filter_backends = (DjangoFilterBackend, )
     filterset_class = TitleFilter
 
 
-class CommentViewSet(viewsets.ModelViewSet):
+class CommentViewSet(GetPostPatchDelModelViewSet):
     serializer_class = CommentSerializer
     permission_classes = (IsAdminModeratorAuthor,)
 
@@ -150,7 +150,7 @@ class CommentViewSet(viewsets.ModelViewSet):
         serializer.save(author=self.request.user, review_id=review_id)
 
 
-class ReviewViewSet(viewsets.ModelViewSet):
+class ReviewViewSet(GetPostPatchDelModelViewSet):
     serializer_class = ReviewSerializer
     permission_classes = (IsAdminModeratorAuthor,)
 

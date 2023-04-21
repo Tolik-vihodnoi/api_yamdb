@@ -14,20 +14,22 @@ class GenreTitleInline(admin.TabularInline):
 
 class TitleAdmin(admin.ModelAdmin):
     list_display = (
-        'id', 'name', 'year', 'get_genre',
-        'get_score', 'category', 'description'
+        'id', 'name', 'year', 'genres',
+        'rating', 'category', 'description'
     )
     inlines = [GenreTitleInline, ]
     list_filter = ('category', )
     list_display_links = ('name', )
     empty_value_display = '-пусто-'
 
-    def get_genre(self, obj):
+    def genres(self, obj):
         return ', '.join((p.name for p in obj.genre.all()))
 
-    def get_score(self, obj):
-        return round(
-            obj.reviews.all().aggregate(score=Avg('score'))['score'], 1)
+    def rating(self, obj):
+        return round(obj.rating, 1)
+
+    def get_queryset(self, request):
+        return Title.objects.annotate(rating=Avg('reviews__score'))
 
 
 class CategoryAdmin(admin.ModelAdmin):

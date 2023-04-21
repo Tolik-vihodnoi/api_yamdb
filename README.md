@@ -23,7 +23,7 @@
 git clone git@github.com:Tolik-vihodnoi/api_yamdb.git
 ```
 
-Откройте терминал проекта из репозитория GitHub, клонированного ранее
+Откройте терминал проекта, клонированного ранее
 
 2. Развертывание в репозитории виртуального окружения
 ```
@@ -61,6 +61,8 @@ python manage.py runserver
 Документация будет доступна после запуска проекта по адресу `/redoc/`.
 
 ## Авторы
-Денис Поречный	Tolik_vihodnoi
-Денис Бобенко	bbenko01
-Эльвира Шукурова	elzshukurova02
+Денис Поречный	[Tolik_vihodnoi](https://github.com/Tolik-vihodnoi)
+
+Денис Бобенко	[bbenko01](https://github.com/bbenko01)
+
+Эльвира Шукурова	[elzshukurova02](https://github.com/elzshukurova02)

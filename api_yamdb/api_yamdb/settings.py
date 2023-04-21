@@ -24,9 +24,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'django_filters',
-    'api.apps.ApiConfig',
     'reviews.apps.ReviewsConfig',
     'users.apps.UsersConfig',
+    'api.apps.ApiConfig',
 ]
 
 MIDDLEWARE = [
@@ -134,3 +134,5 @@ SIMPLE_JWT = {
 
 # Custom vars
 DISP_LETTERS = 15
+CHAR_MAX_L = 256
+SLUG_MAX_L = 50

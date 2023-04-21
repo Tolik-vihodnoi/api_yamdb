@@ -1,8 +1,5 @@
-import datetime
-
-from rest_framework import serializers, validators
+from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
-from django.shortcuts import get_object_or_404
 
 from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import User
@@ -49,13 +46,6 @@ class CustomSlugRelatedField(serializers.SlugRelatedField):
 
 
 class CategorySerializer(serializers.ModelSerializer):
-    slug = serializers.SlugField(
-        max_length=50,
-        validators=[validators.UniqueValidator(
-            Category.objects.all(),
-            message='Категория с таким slug уже существует'
-        )]
-    )
 
     class Meta:
         model = Category
@@ -63,13 +53,6 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class GenreSerializer(serializers.ModelSerializer):
-    slug = serializers.SlugField(
-        max_length=50,
-        validators=[validators.UniqueValidator(
-            Genre.objects.all(),
-            message='Жанр с таким slug уже существует'
-        )]
-    )
 
     class Meta:
         model = Genre
@@ -92,12 +75,6 @@ class TitleSerializer(serializers.ModelSerializer):
         model = Title
         fields = ('id', 'name', 'year',
                   'rating', 'description', 'genre', 'category')
-
-    def validate_year(self, value):
-        if value > datetime.date.today().year:
-            raise ValidationError("Год произведения не может быть больше"
-                                  "текущего года")
-        return value
 
 
 class ReviewSerializer(serializers.ModelSerializer):
