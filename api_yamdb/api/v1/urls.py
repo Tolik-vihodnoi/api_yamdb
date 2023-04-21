@@ -8,7 +8,7 @@ app_name = 'v1'
 
 v1_router = DefaultRouter()
 
-v1_router.register(r'users', UserViewSet, basename='user')
+v1_router.register('users', UserViewSet, basename='user')
 v1_router.register(r'categories', CategoryViewSet, basename='category')
 v1_router.register(r'genres', GenreViewSet, basename='genre')
 v1_router.register(r'titles', TitleViewSet, basename='title_id')
