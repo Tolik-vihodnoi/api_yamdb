@@ -1,5 +1,16 @@
 from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.validators import UnicodeUsernameValidator
+from rest_framework.exceptions import ValidationError
 from django.db import models
+
+username_validator = UnicodeUsernameValidator()
+
+
+def validate_username(username):
+    if username == 'me':
+        raise ValidationError(
+            "Использовать имя 'me' в качестве username запрещено!"
+        )
 
 
 class User(AbstractUser):
@@ -13,6 +24,13 @@ class User(AbstractUser):
         (MODERATOR, 'Модератор'),
     )
 
+    username = models.CharField(
+        'username',
+        max_length=150,
+        unique=True,
+        validators=[username_validator, validate_username],
+    )
+
     email = models.EmailField(unique=True)
 
     bio = models.TextField(
@@ -23,7 +41,7 @@ class User(AbstractUser):
                             choices=CHOISES, default='user')
 
     class Meta:
-        ordering = ('role',)
+        ordering = ('email',)
 
     @property
     def is_moderator(self):
@@ -31,8 +49,4 @@ class User(AbstractUser):
 
     @property
     def is_admin(self):
-        return self.role == User.ADMIN
-
-    @property
-    def is_user(self):
-        return self.role == User.USER
+        return self.role == User.ADMIN or (self.is_staff or self.is_superuser)

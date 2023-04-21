@@ -1,19 +1,21 @@
+import datetime
+
 from django.conf import settings
+from django.contrib.auth import get_user_model
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
-from django.core.validators import MaxValueValidator, MinValueValidator
-
-from users.models import User
+User = get_user_model()
 
 
 class Genre(models.Model):
     name = models.CharField(
-        max_length=256,
+        max_length=settings.CHAR_MAX_L,
         unique=True,
         verbose_name='Жанр'
     )
     slug = models.SlugField(
-        max_length=50,
+        max_length=settings.SLUG_MAX_L,
         unique=True,
         verbose_name='Слаг жанра'
     )
@@ -29,14 +31,16 @@ class Genre(models.Model):
 
 class Title(models.Model):
     name = models.CharField(
-        max_length=256,
+        max_length=settings.CHAR_MAX_L,
         db_index=True,
         verbose_name='Название произведения'
     )
-    year = models.IntegerField()
+    year = models.PositiveSmallIntegerField(
+        verbose_name='Год',
+        validators=(MaxValueValidator(datetime.date.today().year), )
+    )
     description = models.TextField(
         blank=True,
-        null=True,
     )
     genre = models.ManyToManyField(
         Genre,
@@ -59,10 +63,6 @@ class Title(models.Model):
         ordering = ('name', )
         verbose_name = 'Произведение'
         verbose_name_plural = 'Произведения'
-        constraints = [models.UniqueConstraint(
-            fields=('name', 'category'),
-            name='name_category'
-        )]
 
     def __str__(self):
         return self.name[:settings.DISP_LETTERS]
@@ -85,6 +85,8 @@ class GenreTitle(models.Model):
     )
 
     class Meta:
+        #Андрею: я так понял, что ты при ревью подумал, что это к Title модели
+        #Если же это не была не описка, у меня вопросы. После ревью напишу.
         constraints = [
             models.UniqueConstraint(
                 fields=['genre_id', 'title_id'],
@@ -98,12 +100,12 @@ class GenreTitle(models.Model):
 
 class Category(models.Model):
     name = models.CharField(
-        max_length=256,
+        max_length=settings.CHAR_MAX_L,
         unique=True,
         verbose_name='Категория'
     )
     slug = models.SlugField(
-        max_length=50,
+        max_length=settings.SLUG_MAX_L,
         unique=True,
         verbose_name='Слаг категории'
     )
@@ -135,7 +137,9 @@ class Review(models.Model):
         db_index=True,
         verbose_name='Дата отзыва'
     )
-    text = models.TextField()
+    text = models.TextField(
+        verbose_name='Отзыв'
+    )
     score = models.PositiveSmallIntegerField(
         default=0,
         validators=[
@@ -150,7 +154,7 @@ class Review(models.Model):
         ordering = ('-pub_date',)
         constraints = [
             models.UniqueConstraint(
-                fields=['author', 'title'], name="unique_review_id")
+                fields=['author', 'title'], name='unique_review_id')
         ]
 
 
@@ -172,11 +176,14 @@ class Comment(models.Model):
         db_index=True,
         verbose_name='Дата комментария'
     )
-    text = models.TextField()
+    text = models.TextField(
+        'Комментарий'
+    )
 
     class Meta:
         verbose_name = 'Коментарий'
         verbose_name_plural = 'Коментарии'
+        ordering = ('-pub_date',)
 
     def __str__(self):
         return self.author

@@ -10,9 +10,9 @@
 Добавлять отзывы, комментарии и ставить оценки могут только аутентифицированные пользователи.
 
 ### Стек технологий использованный в проекте:
--   Python
+-   Python 3.9
 -   Django
--   Django REST Framework
+-   Django REST Framework 
 -   REST API
 -   SQLite
 -   Аутентификация по JWT-токену
@@ -23,15 +23,24 @@
 git clone git@github.com:Tolik-vihodnoi/api_yamdb.git
 ```
 
-Откройте в своем редакторе кода локальный проекта из репозитория GitHub, клонированного ранее
+Откройте терминал проекта, клонированного ранее
 
 2. Развертывание в репозитории виртуального окружения
 ```
+Windows:
 python -m venv venv
+
+MacOS/Linux:
+python3 -m venv venv
 ```
 3. Запуск виртуального окружения
 ```
+Windows:
 source venv/Scripts/activate
+
+MacOS/Linux:
+source venv/bin/activate
+
 ```
 4. Установка зависимостей в виртуальном окружении
 ```
@@ -57,6 +66,8 @@ python manage.py runserver
 Документация будет доступна после запуска проекта по адресу `/redoc/`.
 
 ## Авторы
-Денис Поречный	Tolik_vihodnoi
-Денис Бобенко	bbenko01
-Эльвира Шукурова	elzshukurova02
+Денис Поречный	[Tolik_vihodnoi](https://github.com/Tolik-vihodnoi)
+
+Денис Бобенко	[bbenko01](https://github.com/bbenko01)
+
+Эльвира Шукурова	[elzshukurova02](https://github.com/elzshukurova02)

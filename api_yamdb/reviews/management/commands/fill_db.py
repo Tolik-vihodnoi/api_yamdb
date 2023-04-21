@@ -64,27 +64,7 @@ class Command(BaseCommand):
             self.stdout.write(self.style.SUCCESS(
                 f'Importing {model} records completed successfully.'))
 
-    def add_arguments(self, parser):
-        parser.add_argument(
-            '-d'
-            '--delete-existing',
-            action='store_true',
-            dest='delete_existing',
-            default=False,
-            help='Delete existing records before generating new ones',
-        )
-
     def handle(self, *args, **options):
-        if options["delete_existing"]:
-            try:
-                [model.objects.all().delete() for model
-                 in reversed(self.csvf_model.values())]
-            except ProtectedError as e:
-                self.stdout.write(self.style.ERROR(
-                    f'Error while deleting instances. {e}'))
-            else:
-                self.stdout.write(
-                    self.style.SUCCESS('All existing records deleted'))
         for csvf, model in self.csvf_model.items():
             self.create_model_instances(csvf, model)
         self.stdout.write(self.style.SUCCESS('All models records saved'))

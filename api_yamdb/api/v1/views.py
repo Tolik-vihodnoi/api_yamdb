@@ -1,43 +1,38 @@
 from smtplib import SMTPResponseException
-from rest_framework.exceptions import ValidationError
+
 from django.conf import settings
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
-from django.db import IntegrityError
+from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, status, viewsets
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.tokens import Token
 
-from reviews.models import Category, Genre, Title, Review
+from reviews.models import Category, Genre, Review, Title
 from users.models import User
 from .filters import TitleFilter
-from .permissions import IsAdminModeratorAuthor, IsAdminUser, IsAdminOrReadOnly
-from .serializers import (CategorySerializer, CreateTokenSerializer,
-                          CreateUserSerializer, GenreSerializer,
-                          TitleSerializer, UserSerializer, CommentSerializer,
-                          ReviewSerializer)
-from django.db.models import Avg
+from .permissions import IsAdminModeratorAuthor, IsAdminOrReadOnly, IsAdminUser
+from .serializers import (CategorySerializer, CommentSerializer,
+                          CreateTokenSerializer, CreateUserSerializer,
+                          GenreSerializer, ReviewSerializer, TitleSerializer,
+                          UserSerializer)
 
 
-class UserViewSet(viewsets.ModelViewSet):
+class GetPostPatchDelModelViewSet(viewsets.ModelViewSet):
+    http_method_names = ['get', 'post', 'patch', 'delete']
+
+
+class UserViewSet(GetPostPatchDelModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [IsAdminUser]
     lookup_field = 'username'
     filter_backends = (filters.SearchFilter,)
     search_fields = ('username',)
-
-    def update(self, request, *args, **kwargs):
-        if request.method == 'PUT':
-            return Response(
-                {'error': 'Метод PUT запрещен'},
-                status=status.HTTP_405_METHOD_NOT_ALLOWED
-            )
-        return super().update(request, *args, **kwargs)
 
     @action(
         detail=False,
@@ -62,10 +57,7 @@ def signup(request):
     serializer = CreateUserSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
     email = serializer.validated_data.get('email')
-    try:
-        user, _ = User.objects.get_or_create(**serializer.validated_data)
-    except IntegrityError:
-        raise ValidationError('Используемый вами email или username уже занят')
+    user, _ = User.objects.get_or_create(**serializer.validated_data)
     token = default_token_generator.make_token(user)
     try:
         send_mail(
@@ -97,9 +89,9 @@ def create_token(request):
     confirmation_code = serializer.validated_data.get('confirmation_code')
 
     if default_token_generator.check_token(user, confirmation_code):
-        jwt_token = RefreshToken.for_user(user)
+        jwt_token = Token.for_user(user)
         return Response(
-            {'token': f'{jwt_token.access_token}'}, status=status.HTTP_200_OK
+            {'token': f'{jwt_token}'}, status=status.HTTP_200_OK
         )
     return Response(
         {'message': 'Нет доступа'},
@@ -107,56 +99,58 @@ def create_token(request):
     )
 
 
-class CategoryViewSet(mixins.CreateModelMixin,
-                      mixins.DestroyModelMixin,
-                      mixins.ListModelMixin,
-                      viewsets.GenericViewSet):
+class CustomCrDelListViewSet(mixins.CreateModelMixin,
+                             mixins.DestroyModelMixin,
+                             mixins.ListModelMixin,
+                             viewsets.GenericViewSet):
+    permission_classes = (IsAdminOrReadOnly,)
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('$name',)
+    lookup_field = 'slug'
+    lookup_value_regex = r'[-a-zA-Z0-9_]{,50}'
+
+
+class CategoryViewSet(CustomCrDelListViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = (IsAdminOrReadOnly, )
-    filter_backends = (filters.SearchFilter, )
-    search_fields = ('$name', )
-    lookup_field = 'slug'
-    lookup_value_regex = r'[-a-zA-Z0-9_]{,50}'
 
 
-class GenreViewSet(mixins.CreateModelMixin,
-                   mixins.DestroyModelMixin,
-                   mixins.ListModelMixin,
-                   viewsets.GenericViewSet):
+class GenreViewSet(CustomCrDelListViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    permission_classes = (IsAdminOrReadOnly, )
-    filter_backends = (filters.SearchFilter, )
-    search_fields = ('$name', )
-    lookup_field = 'slug'
-    lookup_value_regex = r'[-a-zA-Z0-9_]{,50}'
 
 
-class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Title.objects.annotate(rating=Avg('reviews__score'))
+class TitleViewSet(GetPostPatchDelModelViewSet):
+    queryset = Title.objects.annotate(
+        rating=Avg('reviews__score')).order_by('name', 'category')
     serializer_class = TitleSerializer
     permission_classes = (IsAdminOrReadOnly, )
     filter_backends = (DjangoFilterBackend, )
     filterset_class = TitleFilter
 
 
-class CommentViewSet(viewsets.ModelViewSet):
+class CommentViewSet(GetPostPatchDelModelViewSet):
     serializer_class = CommentSerializer
     permission_classes = (IsAdminModeratorAuthor,)
 
     def get_queryset(self):
-        review_id = get_object_or_404(Review, id=self.kwargs.get('review_id'))
+        review_id = get_object_or_404(
+            Review,
+            id=self.kwargs.get('review_id'),
+            title=self.kwargs.get('title_id'),
+        )
         return review_id.comments.all()
 
     def perform_create(self, serializer):
         review_id = get_object_or_404(
             Review,
-            id=self.kwargs.get('review_id'))
+            id=self.kwargs.get('review_id'),
+            title=self.kwargs.get('title_id'),
+        )
         serializer.save(author=self.request.user, review_id=review_id)
 
 
-class ReviewViewSet(viewsets.ModelViewSet):
+class ReviewViewSet(GetPostPatchDelModelViewSet):
     serializer_class = ReviewSerializer
     permission_classes = (IsAdminModeratorAuthor,)
 
