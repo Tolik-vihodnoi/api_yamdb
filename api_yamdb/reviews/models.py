@@ -1,6 +1,5 @@
 from django.conf import settings
 from django.db import models
-
 from django.core.validators import MaxValueValidator, MinValueValidator
 
 from users.models import User
@@ -135,7 +134,9 @@ class Review(models.Model):
         db_index=True,
         verbose_name='Дата отзыва'
     )
-    text = models.TextField()
+    text = models.TextField(
+        'Отзыв'
+    )
     score = models.PositiveSmallIntegerField(
         default=0,
         validators=[
@@ -150,7 +151,7 @@ class Review(models.Model):
         ordering = ('-pub_date',)
         constraints = [
             models.UniqueConstraint(
-                fields=['author', 'title'], name="unique_review_id")
+                fields=['author', 'title'], name='unique_review_id')
         ]
 
 
@@ -172,11 +173,14 @@ class Comment(models.Model):
         db_index=True,
         verbose_name='Дата комментария'
     )
-    text = models.TextField()
+    text = models.TextField(
+        'Комментарий'
+    )
 
     class Meta:
         verbose_name = 'Коментарий'
         verbose_name_plural = 'Коментарии'
+        ordering = ('-pub_date',)
 
     def __str__(self):
         return self.author

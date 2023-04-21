@@ -112,7 +112,6 @@ class ReviewSerializer(serializers.ModelSerializer):
 
     class Meta:
         exclude = ('title',)
-        read_only_fields = ('pub_date',)
         model = Review
 
     def validate(self, data):
@@ -140,5 +139,4 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         exclude = ('review_id',)
-        read_only_fields = ('review_id', 'pub_date')
         model = Comment
