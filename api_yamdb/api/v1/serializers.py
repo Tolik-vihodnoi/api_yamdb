@@ -14,7 +14,8 @@ class CreateUserSerializer(serializers.Serializer):
         validators=[username_validator, validate_username])
 
     def validate(self, data):
-        if User.objects.filter(username=data['username'], email=data['email']).exists():
+        if User.objects.filter(username=data['username'],
+                               email=data['email']).exists():
             return data
         if User.objects.filter(username=data['username']).exists():
             raise ValidationError('Пользователь с таким username '

@@ -5,7 +5,6 @@ from typing import Type, Union
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 from django.db.models import ForeignKey, Model
-from django.db.models.deletion import ProtectedError
 from django.db.utils import IntegrityError
 
 from reviews.models import Category, Comment, Genre, GenreTitle, Review, Title
