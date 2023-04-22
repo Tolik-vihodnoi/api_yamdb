@@ -1,17 +1,17 @@
+from django.conf import settings
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
+from api.v1.validators import username_validator, validate_username
 from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import User
-from api.v1.validators import username_validator, validate_username
-from api_yamdb.settings import CHAR_USERNAME_MAX_L
 
 
 class CreateUserSerializer(serializers.Serializer):
     """Сериализатор создания нового пользователя."""
     email = serializers.EmailField(max_length=254)
     username = serializers.CharField(
-        max_length=CHAR_USERNAME_MAX_L,
+        max_length=settings.CHAR_USERNAME_MAX_L,
         validators=[username_validator, validate_username])
 
     def validate(self, data):
@@ -29,7 +29,7 @@ class CreateUserSerializer(serializers.Serializer):
 
 class CreateTokenSerializer(serializers.Serializer):
     """Сериализатор создания токена."""
-    username = serializers.CharField(max_length=CHAR_USERNAME_MAX_L,
+    username = serializers.CharField(max_length=settings.CHAR_USERNAME_MAX_L,
                                      validators=[username_validator])
     confirmation_code = serializers.CharField()
 
