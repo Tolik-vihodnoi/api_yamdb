@@ -85,14 +85,7 @@ class GenreTitle(models.Model):
     )
 
     class Meta:
-        # Андрею: я так понял, что ты при ревью подумал, что это к Title модели
-        # Если же это не была не описка, у меня вопросы. После ревью напишу.
-        constraints = [
-            models.UniqueConstraint(
-                fields=['genre_id', 'title_id'],
-                name='unique_genre_title'
-            ),
-        ]
+        unique_together = ('genre_id', 'title_id')
 
     def __str__(self):
         return f'{self.title.id} - {self.genre.id}'

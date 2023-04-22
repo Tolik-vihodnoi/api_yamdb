@@ -54,7 +54,7 @@ python manage.py migrate
 
 6. Наполнение базы данных записями из .csv файлов
 ```
-python manage.py fill_db -d
+python manage.py fill_db
 ```
 
 7. Запуск проекта

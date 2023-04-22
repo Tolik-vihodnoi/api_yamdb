@@ -3,7 +3,7 @@ from rest_framework.exceptions import ValidationError
 
 from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import User
-from .validators import username_validator, validate_username
+from api.v1.validators import username_validator, validate_username
 
 
 class CreateUserSerializer(serializers.Serializer):

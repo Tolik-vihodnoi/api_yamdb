@@ -23,7 +23,7 @@ from .serializers import (CategorySerializer, CommentSerializer,
 
 
 class GetPostPatchDelModelViewSet(viewsets.ModelViewSet):
-    http_method_names = ['get', 'post', 'patch', 'delete']
+    http_method_names = ('get', 'post', 'patch', 'delete')
 
 
 class UserViewSet(GetPostPatchDelModelViewSet):
