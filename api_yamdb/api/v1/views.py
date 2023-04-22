@@ -36,7 +36,7 @@ class UserViewSet(GetPostPatchDelModelViewSet):
 
     @action(
         detail=False,
-        methods=(['GET', 'PATCH']),
+        methods=('GET', 'PATCH'),
         permission_classes=[IsAuthenticated],
     )
     def me(self, request):

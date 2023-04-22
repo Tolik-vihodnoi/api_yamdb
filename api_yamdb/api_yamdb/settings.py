@@ -110,7 +110,7 @@ STATICFILES_DIRS = ((BASE_DIR / 'static/'),)
 AUTH_USER_MODEL = 'users.User'
 
 EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
-EMAIL_FILE_PATH = [BASE_DIR / 'sent_emails']
+EMAIL_FILE_PATH = BASE_DIR / 'sent_emails'
 
 MAILING_EMAIL = 'yamdb_code@gmail.com'
 
@@ -136,3 +136,4 @@ SIMPLE_JWT = {
 DISP_LETTERS = 15
 CHAR_MAX_L = 256
 SLUG_MAX_L = 50
+CHAR_USERNAME_MAX_L = 150

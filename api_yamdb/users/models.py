@@ -1,7 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.validators import UnicodeUsernameValidator
-from rest_framework.exceptions import ValidationError
 from django.db import models
+from rest_framework.exceptions import ValidationError
 
 username_validator = UnicodeUsernameValidator()
 
@@ -49,4 +49,4 @@ class User(AbstractUser):
 
     @property
     def is_admin(self):
-        return self.role == User.ADMIN or (self.is_staff or self.is_superuser)
+        return self.role == User.ADMIN or self.is_staff or self.is_superuser
